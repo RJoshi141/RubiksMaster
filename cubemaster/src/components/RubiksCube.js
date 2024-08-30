@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import './styles/RubiksCube.css';
@@ -6,12 +6,13 @@ import './styles/RubiksCube.css';
 const RubiksCube = () => {
   const mountRef = useRef(null);
   const [cubies, setCubies] = useState([]);
+  const [renderer, setRenderer] = useState(null);
   const [scene, setScene] = useState(null);
   const [camera, setCamera] = useState(null);
-  const [selectedCubie, setSelectedCubie] = useState(null);
-  const [highlightMesh, setHighlightMesh] = useState(null);
-  const [rotationDirection, setRotationDirection] = useState(1);
+  const [selectedLayer, setSelectedLayer] = useState(null);
   const [rotationSteps, setRotationSteps] = useState(1);
+  const [rotationDirection, setRotationDirection] = useState(1); // 1 for clockwise, -1 for anticlockwise
+  const [highlightMesh, setHighlightMesh] = useState(null);
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -23,20 +24,20 @@ const RubiksCube = () => {
     const renderer = new THREE.WebGLRenderer({ antialiased: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     mountRef.current.appendChild(renderer.domElement);
+    setRenderer(renderer);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
 
-    // Define the colors for each face
     const faceColors = {
-      front: '#FF5900', // Orange
-      back: '#0045AD',  // Blue
-      left: '#009B48',  // Green
-      right: '#B90000', // Red
-      top: '#FFFFFF',   // White
-      bottom: '#FFD500' // Yellow
+      front: 0xFF5900, // Orange
+      back: 0x0045AD,  // Blue
+      left: 0x009B48,  // Green
+      right: 0xB90000, // Red
+      top: 0xFFFFFF,   // White
+      bottom: 0xFFD500 // Yellow
     };
 
     const createCubies = () => {
@@ -49,19 +50,29 @@ const RubiksCube = () => {
           for (let z = -1; z <= 1; z++) {
             if ((x === -1 || x === 1) || (y === -1 || y === 1) || (z === -1 || z === 1)) {
               const geometry = new THREE.BoxGeometry(size, size, size);
-
               const materials = [
-                new THREE.MeshBasicMaterial({ color: z === -1 ? faceColors.front : (z === 1 ? faceColors.back : 0xaaaaaa) }), // Front and Back
-                new THREE.MeshBasicMaterial({ color: x === -1 ? faceColors.left : (x === 1 ? faceColors.right : 0xaaaaaa) }), // Left and Right
-                new THREE.MeshBasicMaterial({ color: y === -1 ? faceColors.bottom : (y === 1 ? faceColors.top : 0xaaaaaa) }), // Top and Bottom
-                new THREE.MeshBasicMaterial({ color: y === -1 ? faceColors.bottom : (y === 1 ? faceColors.top : 0xaaaaaa) }), // Top and Bottom
-                new THREE.MeshBasicMaterial({ color: z === -1 ? faceColors.front : (z === 1 ? faceColors.back : 0xaaaaaa) }), // Front and Back
-                new THREE.MeshBasicMaterial({ color: z === -1 ? faceColors.front : (z === 1 ? faceColors.back : 0xaaaaaa) })  // Front and Back
+                new THREE.MeshBasicMaterial({ color: x === -1 ? faceColors.left : (x === 1 ? faceColors.right : 0xaaaaaa) }),
+                new THREE.MeshBasicMaterial({ color: x === -1 ? faceColors.left : (x === 1 ? faceColors.right : 0xaaaaaa) }),
+                new THREE.MeshBasicMaterial({ color: y === -1 ? faceColors.bottom : (y === 1 ? faceColors.top : 0xaaaaaa) }),
+                new THREE.MeshBasicMaterial({ color: y === -1 ? faceColors.bottom : (y === 1 ? faceColors.top : 0xaaaaaa) }),
+                new THREE.MeshBasicMaterial({ color: z === -1 ? faceColors.front : (z === 1 ? faceColors.back : 0xaaaaaa) }),
+                new THREE.MeshBasicMaterial({ color: z === -1 ? faceColors.front : (z === 1 ? faceColors.back : 0xaaaaaa) }),
               ];
+
+              // Correctly color internal faces as grey
+              if (x !== -1 && x !== 1) {
+                materials[0] = materials[1] = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+              }
+              if (y !== -1 && y !== 1) {
+                materials[2] = materials[3] = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+              }
+              if (z !== -1 && z !== 1) {
+                materials[4] = materials[5] = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+              }
 
               const cubie = new THREE.Mesh(geometry, materials);
               cubie.position.set(x * (size + spacing), y * (size + spacing), z * (size + spacing));
-              cubie.userData = { x, y, z, face: null }; // Store coordinates and initial face state
+              cubie.userData = { x, y, z }; // Store coordinates
               scene.add(cubie);
               createdCubies.push(cubie);
             }
@@ -72,6 +83,18 @@ const RubiksCube = () => {
     };
 
     createCubies();
+
+    // Create the highlight mesh and add it to the scene
+    const highlightGeometry = new THREE.BoxGeometry(1.1, 1.1, 1.1);
+    const highlightMaterial = new THREE.MeshBasicMaterial({
+      color: 0x00ff00,
+      wireframe: true,
+    });
+    const highlightMesh = new THREE.Mesh(highlightGeometry, highlightMaterial);
+    highlightMesh.visible = false;
+    scene.add(highlightMesh);
+    setHighlightMesh(highlightMesh);
+
     camera.position.z = 5;
 
     const animate = () => {
@@ -97,63 +120,34 @@ const RubiksCube = () => {
       }
       window.removeEventListener('resize', handleResize);
     };
-  }, []); // Removed unused state
+  }, []);
 
-  const updateHighlight = (cubie, face) => {
-    if (highlightMesh) {
-      scene.remove(highlightMesh);
-    }
+  const rotateFace = (face, direction, steps) => {
+    const rotationAngle = (Math.PI / 2) * steps * direction;
+    const rotationMatrix = new THREE.Matrix4().makeRotationZ(rotationAngle);
 
-    const size = 1;
-    const highlightGeometry = new THREE.PlaneGeometry(size, size);
-    const highlightMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
-    const newHighlightMesh = new THREE.Mesh(highlightGeometry, highlightMaterial);
-    
-    switch (face) {
-      case 'front':
-        newHighlightMesh.position.set(cubie.position.x, cubie.position.y, cubie.position.z + 1.01);
-        break;
-      case 'back':
-        newHighlightMesh.position.set(cubie.position.x, cubie.position.y, cubie.position.z - 1.01);
-        break;
-      case 'left':
-        newHighlightMesh.position.set(cubie.position.x - 1.01, cubie.position.y, cubie.position.z);
-        break;
-      case 'right':
-        newHighlightMesh.position.set(cubie.position.x + 1.01, cubie.position.y, cubie.position.z);
-        break;
-      case 'top':
-        newHighlightMesh.position.set(cubie.position.x, cubie.position.y + 1.01, cubie.position.z);
-        break;
-      case 'bottom':
-        newHighlightMesh.position.set(cubie.position.x, cubie.position.y - 1.01, cubie.position.z);
-        break;
-      default:
-        break;
-    }
+    const facePositions = {
+      front: (cubie) => cubie.position.z === 1,
+      back: (cubie) => cubie.position.z === -1,
+      left: (cubie) => cubie.position.x === -1,
+      right: (cubie) => cubie.position.x === 1,
+      top: (cubie) => cubie.position.y === 1,
+      bottom: (cubie) => cubie.position.y === -1
+    };
 
-    switch (face) {
-      case 'front':
-      case 'back':
-        newHighlightMesh.rotation.set(0, 0, 0);
-        break;
-      case 'left':
-      case 'right':
-        newHighlightMesh.rotation.set(0, Math.PI / 2, 0);
-        break;
-      case 'top':
-      case 'bottom':
-        newHighlightMesh.rotation.set(Math.PI / 2, 0, 0);
-        break;
-      default:
-        break;
-    }
+    const isOnFace = facePositions[face];
+    const faceCubies = cubies.filter(cubie => isOnFace(cubie));
 
-    scene.add(newHighlightMesh);
-    setHighlightMesh(newHighlightMesh);
+    faceCubies.forEach(cubie => {
+      const relativePosition = cubie.position.clone();
+      const transformedPosition = relativePosition.applyMatrix4(rotationMatrix);
+      cubie.position.set(transformedPosition.x, transformedPosition.y, transformedPosition.z);
+    });
+
+    renderer.render(scene, camera);
   };
 
-  const handleCubeClick = (event) => {
+  const handleCubeClick = useCallback((event) => {
     const intersectedObjects = event.intersections;
     if (intersectedObjects.length > 0) {
       const cubie = intersectedObjects[0].object;
@@ -163,17 +157,17 @@ const RubiksCube = () => {
                    cubie.position.y === -1 ? 'bottom' : cubie.position.y === 1 ? 'top' :
                    cubie.position.z === -1 ? 'front' : 'back';
 
-      if (selectedCubie === cubie) {
-        const faces = ['front', 'back', 'left', 'right', 'top', 'bottom'];
-        const currentIndex = faces.indexOf(cubie.userData.face);
-        const nextFace = faces[(currentIndex + 1) % faces.length];
-        cubie.userData.face = nextFace;
-        updateHighlight(cubie, nextFace);
-      } else {
-        cubie.userData.face = face;
-        setSelectedCubie(cubie);
-        updateHighlight(cubie, face);
-      }
+      setSelectedLayer({ face, position: cubie.position.clone() });
+
+      // Highlight the selected face
+      highlightMesh.position.copy(cubie.position);
+      highlightMesh.visible = true;
+    }
+  }, [cubies, camera, highlightMesh]);
+
+  const handleRotation = () => {
+    if (selectedLayer) {
+      rotateFace(selectedLayer.face, rotationDirection, rotationSteps);
     }
   };
 
@@ -194,63 +188,32 @@ const RubiksCube = () => {
     return () => {
       window.removeEventListener('click', onMouseClick);
     };
-  }, [cubies, camera, highlightMesh, handleCubeClick]); // Added dependencies
-
-  const handleRotation = () => {
-    if (selectedCubie) {
-      const rotationAxis = new THREE.Vector3();
-      const step = rotationSteps;
-      const direction = rotationDirection;
-
-      switch (selectedCubie.userData.face) {
-        case 'front':
-          rotationAxis.set(0, 0, 1);
-          break;
-        case 'back':
-          rotationAxis.set(0, 0, -1);
-          break;
-        case 'left':
-          rotationAxis.set(-1, 0, 0);
-          break;
-        case 'right':
-          rotationAxis.set(1, 0, 0);
-          break;
-        case 'top':
-          rotationAxis.set(0, 1, 0);
-          break;
-        case 'bottom':
-          rotationAxis.set(0, -1, 0);
-          break;
-        default:
-          rotationAxis.set(0, 0, 0);
-          break;
-      }
-
-      cubies.forEach((cubie) => {
-        cubie.rotation[rotationAxis.getComponent(0) ? 'x' : rotationAxis.getComponent(1) ? 'y' : 'z'] += direction * (step * Math.PI / 2);
-      });
-    }
-  };
+  }, [cubies, camera, handleCubeClick]);
 
   return (
-    <div className="rubiks-cube-container" ref={mountRef}>
+    <div>
+      <div ref={mountRef} className="rubiks-cube-container" />
       <div className="controls">
-        <label>
-          Rotation Direction:
-          <select onChange={(e) => setRotationDirection(Number(e.target.value))} value={rotationDirection}>
-            <option value={1}>Clockwise</option>
-            <option value={-1}>Anticlockwise</option>
-          </select>
-        </label>
-        <label>
-          Steps:
-          <select onChange={(e) => setRotationSteps(Number(e.target.value))} value={rotationSteps}>
-            <option value={1}>1 Step</option>
-            <option value={2}>2 Steps</option>
-            <option value={3}>3 Steps</option>
-          </select>
-        </label>
-        <button onClick={handleRotation}>Rotate</button>
+        {selectedLayer && (
+          <>
+            <label>
+              Rotation Direction:
+              <select onChange={(e) => setRotationDirection(Number(e.target.value))} value={rotationDirection}>
+                <option value={1}>Clockwise</option>
+                <option value={-1}>Anticlockwise</option>
+              </select>
+            </label>
+            <label>
+              Steps:
+              <select onChange={(e) => setRotationSteps(Number(e.target.value))} value={rotationSteps}>
+                {[1, 2, 3].map(step => (
+                  <option key={step} value={step}>{step}</option>
+                ))}
+              </select>
+            </label>
+            <button onClick={handleRotation}>Rotate Face</button>
+          </>
+        )}
       </div>
     </div>
   );
