@@ -11,7 +11,7 @@ const RubiksCube = () => {
   const [camera, setCamera] = useState(null);
   const [selectedLayer, setSelectedLayer] = useState(null);
   const [rotationSteps, setRotationSteps] = useState(1);
-  const [rotationDirection, setRotationDirection] = useState(1); // 1 for clockwise, -1 for anticlockwise
+  const [rotationDirection, setRotationDirection] = useState(1); // 1 clockwise -1 anticlockwise
   const [highlightMesh, setHighlightMesh] = useState(null);
 
   useEffect(() => {
@@ -31,13 +31,14 @@ const RubiksCube = () => {
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
 
+    // coloring the cube
     const faceColors = {
-      orange: 0xFF5900, // Orange
-      blue: 0x0045AD,  // Blue
-      green: 0x009B48,  // Green
-      red: 0xB90000, // Red
-      white: 0xFFFFFF,   // White
-      yellow: 0xFFD500 // Yellow
+      orange: 0xFF5900, 
+      blue: 0x0045AD, 
+      green: 0x009B48,
+      red: 0xB90000,
+      white: 0xFFFFFF,
+      yellow: 0xFFD500
     };
 
     const createCubies = () => {
@@ -58,7 +59,7 @@ const RubiksCube = () => {
                   new THREE.MeshBasicMaterial({ color: z === 1 ? faceColors.red : 0xaaaaaa  }), // Red opp orange
                   new THREE.MeshBasicMaterial({ color: z === -1 ? faceColors.orange : 0xaaaaaa  }), // orange opp red
                 ];
-      
+    
                 const cubie = new THREE.Mesh(geometry, materials);
                 cubie.position.set(x * (size + spacing), y * (size + spacing), z * (size + spacing));
                 cubie.userData = { x, y, z }; // Store coordinates
@@ -71,10 +72,6 @@ const RubiksCube = () => {
         setCubies(createdCubies);
       };
       
-      
-      
-      
-
     createCubies();
 
     // Create the highlight mesh and add it to the scene
@@ -95,7 +92,6 @@ const RubiksCube = () => {
       controls.update(); // Update controls
       renderer.render(scene, camera);
     };
-
     animate();
 
     const handleResize = () => {
