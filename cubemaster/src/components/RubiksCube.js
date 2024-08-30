@@ -32,55 +32,48 @@ const RubiksCube = () => {
     controls.enableZoom = true;
 
     const faceColors = {
-      front: 0xFF5900, // Orange
-      back: 0x0045AD,  // Blue
-      left: 0x009B48,  // Green
-      right: 0xB90000, // Red
-      top: 0xFFFFFF,   // White
-      bottom: 0xFFD500 // Yellow
+      orange: 0xFF5900, // Orange
+      blue: 0x0045AD,  // Blue
+      green: 0x009B48,  // Green
+      red: 0xB90000, // Red
+      white: 0xFFFFFF,   // White
+      yellow: 0xFFD500 // Yellow
     };
 
     const createCubies = () => {
-      const size = 1;
-      const spacing = 0.1;
-      const createdCubies = [];
-
-      for (let x = -1; x <= 1; x++) {
-        for (let y = -1; y <= 1; y++) {
-          for (let z = -1; z <= 1; z++) {
-            if ((x === -1 || x === 1) || (y === -1 || y === 1) || (z === -1 || z === 1)) {
-              const geometry = new THREE.BoxGeometry(size, size, size);
-              const materials = [
-                new THREE.MeshBasicMaterial({ color: x === -1 ? faceColors.left : (x === 1 ? faceColors.right : 0xaaaaaa) }),
-                new THREE.MeshBasicMaterial({ color: x === -1 ? faceColors.left : (x === 1 ? faceColors.right : 0xaaaaaa) }),
-                new THREE.MeshBasicMaterial({ color: y === -1 ? faceColors.bottom : (y === 1 ? faceColors.top : 0xaaaaaa) }),
-                new THREE.MeshBasicMaterial({ color: y === -1 ? faceColors.bottom : (y === 1 ? faceColors.top : 0xaaaaaa) }),
-                new THREE.MeshBasicMaterial({ color: z === -1 ? faceColors.front : (z === 1 ? faceColors.back : 0xaaaaaa) }),
-                new THREE.MeshBasicMaterial({ color: z === -1 ? faceColors.front : (z === 1 ? faceColors.back : 0xaaaaaa) }),
-              ];
-
-              // Correctly color internal faces as grey
-              if (x !== -1 && x !== 1) {
-                materials[0] = materials[1] = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+        const size = 1;
+        const spacing = 0.1;
+        const createdCubies = [];
+      
+        for (let x = -1; x <= 1; x++) {
+          for (let y = -1; y <= 1; y++) {
+            for (let z = -1; z <= 1; z++) {
+              if ((x === -1 || x === 1) || (y === -1 || y === 1) || (z === -1 || z === 1)) {
+                const geometry = new THREE.BoxGeometry(size, size, size);
+                const materials = [
+                  new THREE.MeshBasicMaterial({ color: x === 1 ? faceColors.green : 0xaaaaaa }), // green
+                  new THREE.MeshBasicMaterial({ color: x === -1 ? faceColors.blue : 0xaaaaaa  }), // Blue opp green
+                  new THREE.MeshBasicMaterial({ color: y === 1 ? faceColors.white : 0xaaaaaa }), // Top white
+                  new THREE.MeshBasicMaterial({ color: y === -1 ? faceColors.yellow : 0xaaaaaa }), // yellow opp white
+                  new THREE.MeshBasicMaterial({ color: z === 1 ? faceColors.red : 0xaaaaaa  }), // Red opp orange
+                  new THREE.MeshBasicMaterial({ color: z === -1 ? faceColors.orange : 0xaaaaaa  }), // orange opp red
+                ];
+      
+                const cubie = new THREE.Mesh(geometry, materials);
+                cubie.position.set(x * (size + spacing), y * (size + spacing), z * (size + spacing));
+                cubie.userData = { x, y, z }; // Store coordinates
+                scene.add(cubie);
+                createdCubies.push(cubie);
               }
-              if (y !== -1 && y !== 1) {
-                materials[2] = materials[3] = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
-              }
-              if (z !== -1 && z !== 1) {
-                materials[4] = materials[5] = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
-              }
-
-              const cubie = new THREE.Mesh(geometry, materials);
-              cubie.position.set(x * (size + spacing), y * (size + spacing), z * (size + spacing));
-              cubie.userData = { x, y, z }; // Store coordinates
-              scene.add(cubie);
-              createdCubies.push(cubie);
             }
           }
         }
-      }
-      setCubies(createdCubies);
-    };
+        setCubies(createdCubies);
+      };
+      
+      
+      
+      
 
     createCubies();
 
