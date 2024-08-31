@@ -43,7 +43,7 @@ const RubiksCube = () => {
 
     const createCubies = () => {
         const size = 1;
-        const spacing = 0.1;
+        const spacing = 0.05;
         const createdCubies = [];
       
         for (let x = -1; x <= 1; x++) {
@@ -85,7 +85,7 @@ const RubiksCube = () => {
     scene.add(highlightMesh);
     setHighlightMesh(highlightMesh);
 
-    camera.position.z = 5;
+    camera.position.z = 7;
 
     const animate = () => {
       requestAnimationFrame(animate);
@@ -140,8 +140,6 @@ const RubiksCube = () => {
     const intersectedObjects = event.intersections;
     if (intersectedObjects.length > 0) {
       const cubie = intersectedObjects[0].object;
-      const { x, y, z } = cubie.userData;
-
       const face = cubie.position.x === -1 ? 'left' : cubie.position.x === 1 ? 'right' :
                    cubie.position.y === -1 ? 'bottom' : cubie.position.y === 1 ? 'top' :
                    cubie.position.z === -1 ? 'front' : 'back';
