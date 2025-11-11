@@ -1,33 +1,314 @@
-.rubiks-cube-container {
-  position: relative;
-  width: 100%;
+.cube-layout {
+  display: flex;
+  flex-direction: row;
   height: 100vh;
+  background-color: #111;
+  color: #f1f1f1;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+
+.control-panel {
+  width: 340px;
+  padding: 24px;
+  background: linear-gradient(180deg, rgba(25, 25, 30, 0.95) 0%, rgba(12, 12, 15, 0.95) 100%);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.05), 0 24px 44px -28px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  z-index: 2;
+}
+
+.control-header {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.control-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-title {
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.quick-pill-group {
+  display: flex;
+  gap: 10px;
+}
+
+.quick-pill {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #f6f6f6;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.quick-pill:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.quick-pill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.quick-pill--ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #d7d7d7;
+}
+
+.quick-pill--ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.quick-pill--stop {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fecaca;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.quick-pill--stop:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.28);
+}
+
+.control-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.face-swimlane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.swimlane-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.swimlane-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.chip-button {
+  padding: 8px 0;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-align: center;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  box-shadow: 0 12px 20px -22px rgba(0, 0, 0, 0.8);
+}
+
+.chip-button--neutral {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f4f4f4;
+}
+
+.chip-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.chip-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 26px -22px rgba(0, 0, 0, 0.9);
+}
+
+.chip-button--active {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+}
+
+.rotation-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 24px -32px rgba(0, 0, 0, 0.8);
+}
+
+.toolbar-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.toolbar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toolbar-caption {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.segmented-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 4px 6px;
+  gap: 6px;
+}
+
+.segment {
+  padding: 6px 10px;
+  min-width: 42px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.segment--active {
+  background: rgba(255, 255, 255, 0.9);
+  color: #0d1020;
+}
+
+.segment:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.rotate-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #8b5cf6, #5b21b6);
+  color: #fdf4ff;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  box-shadow: 0 20px 32px -24px rgba(139, 92, 246, 0.65);
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.rotate-button:disabled {
+  cursor: wait;
+  filter: grayscale(0.4);
+  opacity: 0.6;
+}
+
+.rotate-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 36px -22px rgba(139, 92, 246, 0.75);
+  filter: saturate(1.05);
+}
+
+.rotate-button__icon {
+  display: none;
+}
+
+.rotate-button--busy .rotate-button__icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  transform: scale(0.9);
+  animation: rotateIndicator 1.1s linear infinite;
+}
+
+.rotate-button__label {
+  display: inline-block;
+  transform: translateX(0);
+}
+
+@keyframes rotateIndicator {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotation-placeholder {
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  color: #cccccc;
+  font-size: 0.95rem;
+}
+
+.canvas-area {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: #000;
 }
 
-.controls {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 10px;
-  border-radius: 5px;
-  color: #fff;
+.rubiks-cube-container {
+  position: relative;
+  width: min(96vh, 96vw);
+  height: min(96vh, 96vw);
+  max-width: 1040px;
+  max-height: 1040px;
+  margin: 65px auto 0px 140px;
 }
 
-.controls select,
-.controls button {
-  margin: 5px;
-  padding: 5px;
-  background-color: #333;
-  border: 1px solid #555;
-  color: #fff;
-  border-radius: 5px;
+@media (max-width: 960px) {
+  .cube-layout {
+    flex-direction: column;
+  }
+
+  .control-panel {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .canvas-area {
+    height: 60vh;
+  }
 }
-
-.controls button:hover {
-  background-color: #555;
-}
-
-
-
