@@ -12,6 +12,14 @@ Interactive 3D Rubik’s Cube visualizer and trainer built with React and Three.
 - Highlight overlay tracks the currently selected layer.
 - Orbit camera (drag to inspect) with zoom disabled for a fixed scale.
 
+## Demo
+
+| Select & Rotate | Auto Shuffle | Solve Playback |
+| --------------- | ------------ | -------------- |
+| ![Animated demo of selecting a layer and rotating it](assets/cube-rotate.gif) | ![Animated demo of automatically shuffling the cube](assets/cube-shuffle.gif) | ![Animated demo of solving the cube step-by-step](assets/cube-solve.gif) |
+
+> **Note:** drop the three GIFs (`cube-rotate.gif`, `cube-shuffle.gif`, `cube-solve.gif`) into the `assets/` folder to have them render in the README.
+
 ## Requirements
 
 - Node.js 18+ (recommended: latest LTS)
