@@ -18,8 +18,6 @@ Interactive 3D Rubik’s Cube visualizer and trainer built with React and Three.
 | --------------- | ------------ | -------------- |
 | ![Animated demo of selecting a layer and rotating it](assets/cube-rotate.gif) | ![Animated demo of automatically shuffling the cube](assets/cube-shuffle.gif) | ![Animated demo of solving the cube step-by-step](assets/cube-solve.gif) |
 
-> **Note:** drop the three GIFs (`cube-rotate.gif`, `cube-shuffle.gif`, `cube-solve.gif`) into the `assets/` folder to have them render in the README.
-
 ## Requirements
 
 - Node.js 18+ (recommended: latest LTS)
@@ -91,5 +89,5 @@ The root `package.json` tracks shared dependencies (e.g., Three.js), while the C
 
 ## License
 
-MIT © 2025 Your Name
+MIT © 2025 Ritika Joshi
 
