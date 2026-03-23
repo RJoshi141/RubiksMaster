@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/RubiksMaster/static/css/main.3276d361.css",
+    "main.js": "/RubiksMaster/static/js/main.e053c809.js",
+    "static/js/453.6b11ada9.chunk.js": "/RubiksMaster/static/js/453.6b11ada9.chunk.js",
+    "index.html": "/RubiksMaster/index.html",
+    "main.3276d361.css.map": "/RubiksMaster/static/css/main.3276d361.css.map",
+    "main.e053c809.js.map": "/RubiksMaster/static/js/main.e053c809.js.map",
+    "453.6b11ada9.chunk.js.map": "/RubiksMaster/static/js/453.6b11ada9.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3276d361.css",
+    "static/js/main.e053c809.js"
+  ]
+}
